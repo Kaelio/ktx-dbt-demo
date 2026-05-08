@@ -1,0 +1,48 @@
+version: 2
+
+sources:
+  - name: orbit_raw
+    schema: orbit_raw
+    tables:
+      - name: accounts
+        description: 'Customer and internal/test account records for Orbit.'
+      - name: account_hierarchy
+        description: 'Parent-child account relationships used for enterprise retention grain.'
+      - name: plans
+        description: 'Canonical and historical Orbit pricing plans.'
+      - name: contracts
+        description: 'Contract records that provide contract-first ARR for active accounts.'
+      - name: subscriptions
+        description: 'Subscription rows used when active contract ARR is not present for a covered period.'
+      - name: contract_discount_terms
+        description: 'Contract discount terms that explain Q1 2026 enterprise contraction movement.'
+      - name: arr_movements
+        description: 'ARR movement ledger used by retention and expansion marts.'
+      - name: invoices
+        description: 'Billing invoices that anchor gross revenue recognition dates.'
+      - name: invoice_line_items
+        description: 'Invoice line items used to split gross revenue, credits, seats, usage, and addons.'
+      - name: refunds
+        description: 'Refund events that reduce net revenue in the refund month.'
+      - name: plan_segment_mapping
+        description: 'Effective-dated mapping from canonical plans and size bands to reporting segments.'
+      - name: users
+        description: 'Orbit user identities shared across warehouse, Slack, Looker, Notion, and Drive artifacts.'
+      - name: activation_events
+        description: 'Account and requester activation events across the January policy change.'
+      - name: sessions
+        description: 'Product sessions used for pre-policy activation and activity exclusions.'
+      - name: purchase_requests
+        description: 'Procurement request records used for activation, requester activity, and health signals.'
+      - name: approval_events
+        description: 'Approval decisions tied to procurement requests.'
+      - name: suppliers
+        description: 'Supplier directory records associated with procurement workflow events.'
+      - name: supplier_onboarding_events
+        description: 'Supplier onboarding milestones that qualify as procurement workflow activity.'
+      - name: purchase_orders
+        description: 'Purchase orders generated from approved procurement requests.'
+      - name: support_tickets
+        description: 'Customer support tickets that inform account health and risk.'
+      - name: account_owners
+        description: 'Effective-dated ownership assignments for account health, renewals, and escalation context.'

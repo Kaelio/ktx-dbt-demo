@@ -1,0 +1,38 @@
+version: 2
+
+exposures:
+  - name: retention_executive_dashboard
+    label: Retention Executive Dashboard
+    type: dashboard
+    maturity: high
+    url: https://orbit-demo.example.com/dashboards/retention
+    description: Executive retention view covering NRR and movement breakout.
+    depends_on:
+      - ref('mart_nrr_quarterly')
+      - ref('mart_retention_movement_breakout')
+    owner:
+      name: Analytics
+      email: analytics@orbit-demo.example.com
+  - name: executive_revenue_dashboard
+    label: Executive Revenue Dashboard
+    type: dashboard
+    maturity: high
+    url: https://orbit-demo.example.com/dashboards/revenue
+    description: Board reporting view for ARR and gross-to-net revenue.
+    depends_on:
+      - ref('mart_arr_daily')
+      - ref('mart_revenue_daily')
+    owner:
+      name: Finance
+      email: finance@orbit-demo.example.com
+  - name: growth_activation_dashboard
+    label: Growth Activation Dashboard
+    type: dashboard
+    maturity: medium
+    url: https://orbit-demo.example.com/dashboards/activation
+    description: Activation policy comparison around the January 2026 workflow update.
+    depends_on:
+      - ref('mart_account_activity')
+    owner:
+      name: Growth
+      email: growth@orbit-demo.example.com

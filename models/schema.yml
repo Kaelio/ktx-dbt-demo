@@ -1,0 +1,455 @@
+version: 2
+
+models:
+  - name: stg_accounts
+    description: 'Customer and internal/test account records for Orbit.'
+    columns:
+      - name: account_id
+        data_tests:
+          - not_null
+          - unique
+      - name: sales_region
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [na, emea, apac]
+      - name: size_band
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [smb, mid_market, enterprise]
+      - name: lifecycle_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [prospect, active, churned, internal, test]
+  - name: stg_account_hierarchy
+    description: 'Parent-child account relationships used for enterprise retention grain.'
+    columns:
+      - name: account_hierarchy_id
+        data_tests:
+          - not_null
+          - unique
+      - name: relationship_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [subsidiary, division, billing_group]
+  - name: stg_plans
+    description: 'Canonical and historical Orbit pricing plans.'
+    columns:
+      - name: plan_id
+        data_tests:
+          - not_null
+          - unique
+      - name: canonical_plan_code
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [starter, growth, enterprise]
+  - name: stg_contracts
+    description: 'Contract records that provide contract-first ARR for active accounts.'
+    columns:
+      - name: contract_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [draft, active, cancelled, expired]
+      - name: renewal_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [new, renewal, expansion, downgrade]
+  - name: stg_subscriptions
+    description: 'Subscription rows used when active contract ARR is not present for a covered period.'
+    columns:
+      - name: subscription_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [active, cancelled, past_due, trialing]
+  - name: stg_contract_discount_terms
+    description: 'Contract discount terms that explain Q1 2026 enterprise contraction movement.'
+    columns:
+      - name: discount_term_id
+        data_tests:
+          - not_null
+          - unique
+      - name: discount_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [launch, renewal, migration, goodwill]
+  - name: stg_arr_movements
+    description: 'ARR movement ledger used by retention and expansion marts.'
+    columns:
+      - name: arr_movement_id
+        data_tests:
+          - not_null
+          - unique
+      - name: movement_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [new, expansion, contraction, churn, reactivation]
+  - name: stg_invoices
+    description: 'Billing invoices that anchor gross revenue recognition dates.'
+    columns:
+      - name: invoice_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [draft, open, paid, void, failed]
+      - name: currency
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [USD]
+  - name: stg_invoice_line_items
+    description: 'Invoice line items used to split gross revenue, credits, seats, usage, and addons.'
+    columns:
+      - name: invoice_line_item_id
+        data_tests:
+          - not_null
+          - unique
+      - name: line_item_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [subscription, seat, usage, addon, credit]
+  - name: stg_refunds
+    description: 'Refund events that reduce net revenue in the refund month.'
+    columns:
+      - name: refund_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [pending, succeeded, failed, cancelled]
+  - name: stg_plan_segment_mapping
+    description: 'Effective-dated mapping from canonical plans and size bands to reporting segments.'
+    columns:
+      - name: plan_segment_mapping_id
+        data_tests:
+          - not_null
+          - unique
+      - name: canonical_plan_code
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [starter, growth, enterprise]
+      - name: size_band
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [smb, mid_market, enterprise]
+      - name: segment
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [self_serve, commercial, enterprise]
+  - name: stg_users
+    description: 'Orbit user identities shared across warehouse, Slack, Looker, Notion, and Drive artifacts.'
+    columns:
+      - name: user_id
+        data_tests:
+          - not_null
+          - unique
+  - name: stg_activation_events
+    description: 'Account and requester activation events across the January policy change.'
+    columns:
+      - name: activation_event_id
+        data_tests:
+          - not_null
+          - unique
+      - name: event_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [first_requester_login, requester_activated, first_approved_purchase_request, account_activated]
+      - name: policy_version
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [pre_2026_01_15, post_2026_01_15]
+  - name: stg_sessions
+    description: 'Product sessions used for pre-policy activation and activity exclusions.'
+    columns:
+      - name: session_id
+        data_tests:
+          - not_null
+          - unique
+  - name: stg_purchase_requests
+    description: 'Procurement request records used for activation, requester activity, and health signals.'
+    columns:
+      - name: purchase_request_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [draft, submitted, approved, rejected, cancelled]
+  - name: stg_approval_events
+    description: 'Approval decisions tied to procurement requests.'
+    columns:
+      - name: approval_event_id
+        data_tests:
+          - not_null
+          - unique
+      - name: decision
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [approved, rejected, returned]
+  - name: stg_suppliers
+    description: 'Supplier directory records associated with procurement workflow events.'
+    columns:
+      - name: supplier_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [invited, onboarding, active, inactive]
+  - name: stg_supplier_onboarding_events
+    description: 'Supplier onboarding milestones that qualify as procurement workflow activity.'
+    columns:
+      - name: supplier_onboarding_event_id
+        data_tests:
+          - not_null
+          - unique
+      - name: event_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [invited, profile_started, profile_completed, approved]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [pending, completed, blocked]
+  - name: stg_purchase_orders
+    description: 'Purchase orders generated from approved procurement requests.'
+    columns:
+      - name: purchase_order_id
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [created, sent, fulfilled, cancelled]
+  - name: stg_support_tickets
+    description: 'Customer support tickets that inform account health and risk.'
+    columns:
+      - name: support_ticket_id
+        data_tests:
+          - not_null
+          - unique
+      - name: severity
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [low, medium, high, critical]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [open, pending, solved, closed]
+  - name: stg_account_owners
+    description: 'Effective-dated ownership assignments for account health, renewals, and escalation context.'
+    columns:
+      - name: account_owner_id
+        data_tests:
+          - not_null
+          - unique
+      - name: owner_team
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [sales_ops, customer_success, finance]
+  - name: int_active_contract_arr
+    description: Active contract ARR as of 2026-03-31.
+    columns:
+      - name: contract_id
+        data_tests:
+          - not_null
+          - unique
+  - name: int_parent_account_arr_movements
+    description: Parent-account movement rollups for retention metrics.
+    columns:
+      - name: arr_movement_id
+        data_tests:
+          - not_null
+          - unique
+      - name: movement_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [new, expansion, contraction, churn, reactivation]
+      - name: is_discount_expiration_contraction
+        description: Discount expiration contraction flag used to keep discount movement separate from churn.
+  - name: int_revenue_components
+    description: Daily gross, credit, refund, and net revenue components.
+  - name: int_procurement_qualifying_actions
+    description: Non-internal, non-test requester activity for large active contracts in the golden week.
+  - name: int_activation_policy_windows
+    description: Activation cohort counts around the January 2026 policy change.
+  - name: int_customer_health_signals
+    description: Support-ticket and recent-procurement signals for customer health risk.
+  - name: mart_arr_daily
+    description: Board-prep ARR as of the metric date.
+    meta:
+      governed_metric_key: arr
+      owner_team: finance
+      notion_locator: notion://notion_page_arr_contract_reporting#arr-contract-first
+      expected_answer: expected-answer://arr_as_of_2026_03_31
+    columns:
+      - name: metric_date
+        data_tests:
+          - not_null
+          - unique
+      - name: arr_cents
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1874200000]
+                quote: false
+  - name: mart_nrr_quarterly
+    description: Enterprise quarterly net revenue retention.
+    meta:
+      governed_metric_key: net_revenue_retention
+      owner_team: analytics
+      notion_locator: notion://notion_page_retention_policy_current#nrr-definition
+      expected_answer: expected-answer://enterprise_nrr_q1_vs_q4_breakout
+    columns:
+      - name: quarter_label
+        data_tests:
+          - not_null
+      - name: net_revenue_retention
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1.018]
+                quote: false
+              config:
+                where: "quarter_label = '2026-Q1' and segment = 'enterprise'"
+          - accepted_values:
+              arguments:
+                values: [1.064]
+                quote: false
+              config:
+                where: "quarter_label = '2025-Q4' and segment = 'enterprise'"
+  - name: mart_retention_movement_breakout
+    description: Q1 2026 enterprise retention movement breakout.
+    meta:
+      governed_metric_key: net_revenue_retention
+      owner_team: analytics
+      notion_locator: notion://notion_page_retention_policy_current#discount-expiration-treatment
+      expected_answer: expected-answer://enterprise_expansions_q1_2026
+    columns:
+      - name: movement_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [expansion, contraction, churn]
+      - name: movement_reason
+        description: Includes discount_expiration contraction, which is not churn.
+      - name: parent_account_count
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [11]
+                quote: false
+              config:
+                where: "movement_type = 'contraction' and movement_reason = 'discount_expiration'"
+      - name: expansion_arr_cents
+        description: Expansion ARR cents for Q1 enterprise movement rows.
+  - name: mart_revenue_daily
+    description: Daily revenue mart that reconciles gross, credits, refunds, and net revenue.
+    meta:
+      governed_metric_key: net_revenue
+      owner_team: finance
+      notion_locator: notion://notion_page_revenue_reporting_policy#gross-to-net-reconciliation
+      expected_answer: expected-answer://revenue_net_vs_gross_reconciliation
+    columns:
+      - name: revenue_date
+        data_tests:
+          - not_null
+          - unique
+      - name: reconciliation_check
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+      - name: net_revenue_cents
+        description: Daily net revenue in cents; February 2026 total is covered by assert_february_2026_net_revenue.
+  - name: mart_account_activity
+    description: Activation policy comparison values.
+    meta:
+      governed_metric_key: activated_accounts
+      owner_team: growth
+      notion_locator: notion://notion_page_activation_policy_decision#policy-change
+      expected_answer: expected-answer://activation_after_policy_change
+  - name: mart_procurement_activity
+    description: Weekly active requester counts for large active contracts.
+    meta:
+      governed_metric_key: weekly_active_requesters
+      owner_team: product
+      notion_locator: notion://notion_page_procurement_instrumentation#qualifying-procurement-actions
+      expected_answer: expected-answer://active_requesters_last_week_large_contracts
+    columns:
+      - name: active_requesters
+        description: Weekly active requesters for large active contracts.
+  - name: mart_customer_health
+    description: Customer-health risk mart as of 2026-03-31.
+    meta:
+      governed_metric_key: active_customers
+      owner_team: customer_success
+      notion_locator: notion://notion_page_customer_health_playbook#risk-definition
+      expected_answer: expected-answer://customer_health_risk_accounts
+    columns:
+      - name: account_id
+        data_tests:
+          - not_null
+          - unique
+      - name: risk_level
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [low, medium, high]
+  - name: mart_account_segments
+    description: Current plan, size band, and reporting segment for accounts.
+    meta:
+      governed_metric_key: segment
+      owner_team: sales_ops
+      notion_locator: notion://notion_page_sales_ops_segmentation#growth-plan-normalization
+      expected_answer: expected-answer://enterprise_nrr_q1_vs_q4_breakout
+    columns:
+      - name: account_id
+        data_tests:
+          - not_null
+          - unique
+      - name: normalized_plan_code
+        description: pro_plus is normalized to growth through plans.canonical_plan_code.

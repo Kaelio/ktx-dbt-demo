@@ -1,0 +1,12 @@
+kaelio_demo:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('KAELIO_DEMO_PG_HOST', 'localhost') }}"
+      port: "{{ env_var('KAELIO_DEMO_PG_PORT', '5432') | int }}"
+      user: "{{ env_var('KAELIO_DEMO_PG_USER', 'postgres') }}"
+      password: "{{ env_var('KAELIO_DEMO_PG_PASSWORD', '') }}"
+      dbname: "{{ env_var('KAELIO_DEMO_PG_DATABASE', 'kaelio_demo') }}"
+      schema: orbit_analytics
+      threads: 4
