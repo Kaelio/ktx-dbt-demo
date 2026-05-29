@@ -1,6 +1,6 @@
 # klo-dbt-demo
 
-Demo dbt project for Orbit analytics.
+A demo dbt project showcasing Orbit analytics models.
 
 This project builds views in the `orbit_analytics` schema from raw source tables in
 `orbit_raw`.
